@@ -1,12 +1,13 @@
-package tests
+package main
 
 import (
 	"database/sql"
-	"testing"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/Lioncat2002/qgo/core/field"
 	"github.com/Lioncat2002/qgo/core/qgo"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type User struct {
@@ -20,13 +21,23 @@ func (User) Fields() []field.Field {
 	}
 }
 
-func TestUserCreate(t *testing.T) {
+type UserSchema struct {
+	id   int
+	name string
+}
+
+func main() {
 	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
-		t.Fatal("failed to create db", err)
+		log.Fatalln("failed to create db", err)
 	}
 	err = qgo.Migrate(db, User{})
 	if err != nil {
-		t.Fatal("failed to create db", err)
+		log.Fatalln("failed to create table user", err)
 	}
+
+	query := qgo.Select("*").From(User{})
+	log.Println(query)
+	query = qgo.Insert(User{}).Columns(UserSchema{}).Values(UserSchema{id: 0, name: "pussycat"})
+	log.Println(query)
 }
