@@ -31,13 +31,21 @@ func main() {
 	if err != nil {
 		log.Fatalln("failed to create db", err)
 	}
-	err = qgo.Migrate(db, User{})
-	if err != nil {
-		log.Fatalln("failed to create table user", err)
-	}
+	//err = qgo.Migrate(db, User{})
+	//if err != nil {
+	//	log.Fatalln("failed to create table user", err)
+	//}
 
-	query := qgo.Select("*").From(User{})
-	log.Println(query)
-	query = qgo.Insert(User{}).Columns(UserSchema{}).Values(UserSchema{id: 0, name: "pussycat"})
-	log.Println(query)
+	result, err := qgo.Select(UserSchema{}).From(User{}).Exec(db)
+	log.Println(result, err)
+	data := UserSchema{}
+	for result.(*sql.Rows).Next() {
+		err := result.(*sql.Rows).Scan(&data.id, &data.name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Output the data
+		log.Println(data)
+	}
 }
