@@ -16,14 +16,14 @@ type User struct {
 
 func (User) Fields() []field.Field {
 	return []field.Field{
-		field.Int("id").SetUnique(),
-		field.String("name", 255).SetDefault("unknown"),
+		field.Int("Id").SetUnique(),
+		field.String("Name", 255).SetDefault("unknown"),
 	}
 }
 
 type UserSchema struct {
-	id   int
-	name string
+	Id   int
+	Name string
 }
 
 func main() {
@@ -31,16 +31,17 @@ func main() {
 	if err != nil {
 		log.Fatalln("failed to create db", err)
 	}
-	//err = qgo.Migrate(db, User{})
-	//if err != nil {
-	//	log.Fatalln("failed to create table user", err)
-	//}
-
-	result, err := qgo.Select(UserSchema{}).From(User{}).Exec(db)
+	err = qgo.Migrate(db, User{})
+	if err != nil {
+		log.Fatalln("failed to create table user", err)
+	}
+	result, err := qgo.Insert(User{}).Columns(UserSchema{}).Values(UserSchema{Id: 5, Name: "meow"}).Exec(db)
+	log.Println(result, err)
+	result, err = qgo.Select(UserSchema{}).From(User{}).Exec(db)
 	log.Println(result, err)
 	data := UserSchema{}
 	for result.(*sql.Rows).Next() {
-		err := result.(*sql.Rows).Scan(&data.id, &data.name)
+		err := result.(*sql.Rows).Scan(&data.Id, &data.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
